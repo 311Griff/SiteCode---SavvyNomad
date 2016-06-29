@@ -7,7 +7,9 @@ var gulp = require('gulp'),
  sourcemaps = require('gulp-sourcemaps'),//adds debugging tools 
  sass = require('gulp-sass'),
  babel = require('gulp-babel'),
- plumber = require('gulp-plumber'); //error checking
+ plumber = require('gulp-plumber'),//error checking
+ del = require('del'),
+ zip = require('gulp-zip');
 
 //handlebars plugins
 var handlebars = require('gulp-handlebars'),
@@ -15,11 +17,17 @@ var handlebars = require('gulp-handlebars'),
     declare = require('gulp-declare'),
     wrap = require('gulp-wrap');
 
+//image compression
+var imagemin=require('gulp-imagemin');
+var imageminPngQuant = require('imagemin-pngquant');
+var imageminJpgRecompress = require('imagemin-jpeg-recompress');
+
 //filepaths variables
 var DIST_PATH = 'public/dist',
 SCRIPTS_PATH = 'public/scripts/**/*.js',
 CSS_PATH = 'public/css/**/*.css', //all css files in the css folder, or folders in the css folder
-TEMPLATES_PATH = 'templates/**/*.hbs';
+TEMPLATES_PATH = 'templates/**/*.hbs',
+IMAGES_PATH = 'public/images/**/*.{png,jpeg,jpg,svg,gif}';
 
 //Styles gulp task - see notes below
 /*gulp.task('styles', function() { //names the task styles and sets it to a function in the file
@@ -86,8 +94,22 @@ gulp.task('scripts', function() {
 
 //Images gulp task
 gulp.task('images', function() {
-    console.log('starting images task');
+    return gulp.src(IMAGES_PATH)
+        .pipe(imagemin(
+            [
+                imagemin.gifsicle(),
+                imagemin.jpegtran(),
+                imagemin.optipng(),
+                imagemin.svgo(),
+                imageminPngQuant(),
+                imageminJpgRecompress()
+            ]
+
+        ))
+        .pipe(gulp.dest(DIST_PATH + '/images'));
 });
+
+
 //handlebars template task
 gulp.task('templates', function(){
     return gulp.src(TEMPLATES_PATH)
@@ -104,10 +126,24 @@ gulp.task('templates', function(){
         .pipe(reload());
 });
 
+//clean files and folders (uses del)
+gulp.task('clean',function(){
+   return del.sync([
+      DIST_PATH,
+       './website.zip'
+   ]);
+});
+
 //default gulp task
-gulp.task('default', ['images', 'templates', 'styles', 'scripts'], function() {
+gulp.task('default', ['clean','images', 'templates', 'styles', 'scripts'], function() {
     console.log('starting default task');
 
+});
+
+gulp.task('export',function(){
+   return gulp.src('public/**/*')
+       .pipe(zip('website.zip'))
+       .pipe(gulp.dest('./'));
 });
 
 //watches for changes in the files referenced in the tasks and acts on them when changes occur and are saved
