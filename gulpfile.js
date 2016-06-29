@@ -1,21 +1,7 @@
 var gulp = require('gulp'),
- uglify = require('gulp-uglify'),
- reload = require('gulp-livereload'),
- concat = require('gulp-concat'),
- minifycss = require('gulp-minify-css'),
- autoprefixer = require('gulp-autoprefixer'),
- sourcemaps = require('gulp-sourcemaps'),//adds debugging tools 
- sass = require('gulp-sass'),
- babel = require('gulp-babel'),
- plumber = require('gulp-plumber'),//error checking
- del = require('del'),
- zip = require('gulp-zip');
-
-//handlebars plugins
-var handlebars = require('gulp-handlebars'),
-    handlebarsLib = require('handlebars'),
-    declare = require('gulp-declare'),
-    wrap = require('gulp-wrap');
+    plugins = require('gulp-load-plugins')(),
+ //minifycss = require('gulp-minify-css'),
+ del = require('del');
 
 //image compression
 var imagemin=require('gulp-imagemin');
@@ -53,21 +39,21 @@ IMAGES_PATH = 'public/images/**/*.{png,jpeg,jpg,svg,gif}';
 gulp.task('styles', function() { //names the task styles and sets it to a function in the file
     console.log('starting styles task');
     return gulp.src('public/scss/styles.scss')
-        .pipe (plumber( function(err){//handles errors, throws them to the console, keeps gulp alive
+        .pipe (plugins.plumber( function(err){//handles errors, throws them to the console, keeps gulp alive
             console.log('styles task error');
             console.log(err);
             this.emit('end');
         }))
-        .pipe(sourcemaps.init())//initialize the maps, these show the file and line the code belongs to in dev tools
-        .pipe(autoprefixer({ //auto prefixes the styles
+        .pipe(plugins.sourcemaps.init())//initialize the maps, these show the file and line the code belongs to in dev tools
+        .pipe(plugins.autoprefixer({ //auto prefixes the styles
             browsers: ['last 2 versions']
         }))
-        .pipe(sass({
+        .pipe(plugins.sass({
             outputStyle: 'compressed'
         }))
-        .pipe(sourcemaps.write())//write the maps before writing to the file
+        .pipe(plugins.sourcemaps.write())//write the maps before writing to the file
         .pipe(gulp.dest(DIST_PATH)) //puts the file styles.css into the dist folder
-        .pipe(reload()); //reloads the local page with refreshed changes
+        .pipe(plugins.livereload()); //reloads the local page with refreshed changes
 });
 
 
@@ -76,20 +62,20 @@ gulp.task('scripts', function() {
     console.log('starting scripts task');
 
     return gulp.src(SCRIPTS_PATH)
-        .pipe (plumber( function(err){//handles errors, throws them to the console, keeps gulp alive
+        .pipe (plugins.plumber( function(err){//handles errors, throws them to the console, keeps gulp alive
             console.log('scripts task error');
             console.log(err);
             this.emit('end');
         }))
-        .pipe(sourcemaps.init())
-        .pipe(babel({
+        .pipe(plugins.sourcemaps.init())
+        .pipe(plugins.babel({
             presets: ['es2015']//this is compiling es 6 code into older versions of javascript for the browser
         }))
-        .pipe(uglify()) //minifies the js and makes it easier on processing memory
-        .pipe(concat('scripts.js'))
-        .pipe(sourcemaps.write())
+        .pipe(plugins.uglify()) //minifies the js and makes it easier on processing memory
+        .pipe(plugins.concat('scripts.js'))
+        .pipe(plugins.sourcemaps.write())
         .pipe(gulp.dest(DIST_PATH)) //puts the new js file into the dist foler
-        .pipe(reload());//reloads the local browser with new changes
+        .pipe(plugins.livereload());//reloads the local browser with new changes
 });
 
 //Images gulp task
@@ -110,22 +96,6 @@ gulp.task('images', function() {
 });
 
 
-//handlebars template task
-gulp.task('templates', function(){
-    return gulp.src(TEMPLATES_PATH)
-        .pipe(handlebars({
-            handlebars: handlebarsLib //compile as handlebars templates
-        }))
-        .pipe(wrap('Handlebars.template(<%= contents %>)')) //wrap code into templates
-        .pipe(declare({
-            namespace: 'templates',  //create a templates variable
-            noRedeclare: true
-        }))
-        .pipe(concat('templates.js')) //concatenate the templates
-        .pipe(gulp.dest(DIST_PATH)) //save the compiled code into the dist folder
-        .pipe(reload());
-});
-
 //clean files and folders (uses del)
 gulp.task('clean',function(){
    return del.sync([
@@ -135,23 +105,22 @@ gulp.task('clean',function(){
 });
 
 //default gulp task
-gulp.task('default', ['clean','images', 'templates', 'styles', 'scripts'], function() {
+gulp.task('default', ['clean','images', 'styles', 'scripts'], function() {
     console.log('starting default task');
 
 });
 
 gulp.task('export',function(){
    return gulp.src('public/**/*')
-       .pipe(zip('website.zip'))
+       .pipe(plugins.zip('website.zip'))
        .pipe(gulp.dest('./'));
 });
 
 //watches for changes in the files referenced in the tasks and acts on them when changes occur and are saved
 
 gulp.task('watch', ['default'], function() { //run default before running watch
-    console.log('watch is started');
     require('./server.js'); //starts a local server
-    reload.listen(); //listens for a reload to send to the page on the local server
+    plugins.reload.listen(); //listens for a reload to send to the page on the local server
     gulp.watch(SCRIPTS_PATH, ['scripts']); //watches the scripts file(s) for changes
     //gulp.watch(CSS_PATH, ['styles']); //watches the css file(s) for changes
     gulp.watch('public/scss/**/*.scss', ['styles']);
