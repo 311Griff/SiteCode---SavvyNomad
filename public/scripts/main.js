@@ -1,4 +1,4 @@
-class Person {
+/*class Person {
 	constructor(name) {
 		this.name = name;
 	}
@@ -17,3 +17,5 @@ var greetHTML = templates['greeting']({
 });
 
 document.write(greetHTML);
+	*/
+

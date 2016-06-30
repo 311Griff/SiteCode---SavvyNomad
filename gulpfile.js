@@ -9,7 +9,7 @@ var imageminPngQuant = require('imagemin-pngquant');
 var imageminJpgRecompress = require('imagemin-jpeg-recompress');
 
 //filepaths variables
-var DIST_PATH = 'public/dist',
+var DIST_PATH = './build',
 SCRIPTS_PATH = 'public/scripts/**/*.js',
 CSS_PATH = 'public/css/**/*.css', //all css files in the css folder, or folders in the css folder
 TEMPLATES_PATH = 'templates/**/*.hbs',
@@ -35,10 +35,24 @@ IMAGES_PATH = 'public/images/**/*.{png,jpeg,jpg,svg,gif}';
         .pipe(reload()); //reloads the local page with refreshed changes
 });*/
 
+gulp.task('html', function(){
+   return gulp.src('public/markup/**/*.{hbs, html}')
+       .pipe(plugins.hb({
+           partials: ['./public/markup/partials/**/*.hbs','./public/markup/layouts/**/*.hbs'],
+           data: './public/markup/data/**/*.{json, js}',
+           helpers: './node_modules/handlebars-layouts'
+
+       }))
+       .pipe(gulp.dest(DIST_PATH))
+
+
+});
+
+
 //sass files
 gulp.task('styles', function() { //names the task styles and sets it to a function in the file
     console.log('starting styles task');
-    return gulp.src('public/scss/styles.scss')
+    return gulp.src('public/scss/app.scss')
         .pipe (plugins.plumber( function(err){//handles errors, throws them to the console, keeps gulp alive
             console.log('styles task error');
             console.log(err);
@@ -105,7 +119,7 @@ gulp.task('clean',function(){
 });
 
 //default gulp task
-gulp.task('default', ['clean','images', 'styles', 'scripts'], function() {
+gulp.task('default', ['clean','images', 'html', 'styles', 'scripts'], function() {
     console.log('starting default task');
 
 });
@@ -124,5 +138,5 @@ gulp.task('watch', ['default'], function() { //run default before running watch
     gulp.watch(SCRIPTS_PATH, ['scripts']); //watches the scripts file(s) for changes
     //gulp.watch(CSS_PATH, ['styles']); //watches the css file(s) for changes
     gulp.watch('public/scss/**/*.scss', ['styles']);
-    gulp.watch(TEMPLATES_PATH, ['templates']);
+    gulp.watch('public/html/**/*.{hbs, html}',['html']);
 });
