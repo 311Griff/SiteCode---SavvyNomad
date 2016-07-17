@@ -1,0 +1,47 @@
+<!doctype html>
+<html class="{{file.data.class}}" lang="en">
+<head>
+    {{#block "head"}}
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>
+            {{#block "title"}}
+                {{site.title}}
+            {{/block}}
+        </title>
+
+        {{#block "meta"}}
+            {{ _partials/meta }}
+        {{/block}}
+
+
+        {{#block "modernizr"}}
+            <script src="//cdnjs.cloudflare.com/ajax/libs/foundation/5.0.2/js/modernizr.js"></script>
+        {{/block}}
+
+        {{#block "styles"}}
+            <link rel="stylesheet" href="app.css/">
+        {{/block}}
+
+    {{/block}}
+</head>
+<body class="{{file.data.bodyClass}}">
+{{#block "header"}}
+    {{ _partials/header }}
+{{/block}}
+
+<main>
+    {{#block "content"}}
+    {{/block}}
+</main>
+
+{{#block "footer"}}
+    {{ _partials/footer }}
+{{/block}}
+
+{{#block "scripts"}}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="scripts.js"></script>
+{{/block}}
+</body>
+</html>

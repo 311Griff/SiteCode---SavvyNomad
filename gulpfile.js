@@ -36,10 +36,13 @@ IMAGES_PATH = 'public/images/**/*.{png,jpeg,jpg,svg,gif}';
 });*/
 
 gulp.task('html', function(){
-   return gulp.src('public/markup/**/*.{hbs, html}')
+   return gulp.src([
+       'public/markup/**/*.{hbs, html}',
+        '!public/markup/_**/**/*'
+   ])
        .pipe(plugins.hb({
-           partials: ['./public/markup/partials/**/*.hbs','./public/markup/layouts/**/*.hbs'],
-           data: './public/markup/data/**/*.{json, js}',
+           partials: ['./public/markup/_partials/**/*.hbs','./public/markup/_layouts/**/*.hbs'],
+           data: './public/markup/_data/**/*.{json, js}',
            helpers: './node_modules/handlebars-layouts'
 
        }))
